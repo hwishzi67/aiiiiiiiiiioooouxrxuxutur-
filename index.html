@@ -13,7 +13,6 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* حل نهائي لمشكلة ارتفاع الشاشة عند ظهور الكيبورد */
         html {
             height: 100%;
             overflow: hidden;
@@ -33,7 +32,6 @@
             position: relative;
         }
         
-        /* الهيدر العلوي */
         .navbar {
             height: 60px;
             background: #0B0E14;
@@ -64,8 +62,6 @@
             align-items: center;
             justify-content: center;
             border-radius: 8px;
-            position: relative;
-            z-index: 110;
         }
         .menu-btn:active {
             background: rgba(255,255,255,0.08);
@@ -77,7 +73,6 @@
             color: #E2E8F0;
         }
 
-        /* القائمة الجانبية */
         .sidebar {
             position: fixed;
             top: 0;
@@ -117,9 +112,6 @@
             align-items: center;
             justify-content: center;
             border-radius: 8px;
-        }
-        .back-btn:active {
-            background: rgba(255,255,255,0.08);
         }
         
         .conversations-list {
@@ -163,11 +155,7 @@
             font-size: 0.95rem;
             border-radius: 6px;
         }
-        .edit-name-btn:active {
-            background: rgba(255,255,255,0.08);
-        }
 
-        /* منطقة الشات */
         .chat-area {
             flex: 1;
             overflow-y: auto;
@@ -203,29 +191,6 @@
             border: 1px solid rgba(255, 255, 255, 0.04);
         }
 
-        /* أنيميشن الثلاث نقاط المضيئة أثناء التفكير والكتابة */
-        .typing-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 4px;
-        }
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: #A0AEC0;
-            border-radius: 50%;
-            animation: pulseWave 1.2s infinite ease-in-out;
-        }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        
-        @keyframes pulseWave {
-            0%, 100% { transform: translateY(0); opacity: 0.4; background: #A0AEC0; }
-            50% { transform: translateY(-6px); opacity: 1; background: #6366F1; }
-        }
-
-        /* المرفقات */
         .chat-img, .chat-video {
             max-width: 100%;
             max-height: 240px;
@@ -247,7 +212,6 @@
         .file-info { display: flex; flex-direction: column; font-size: 0.85rem; }
         .file-size { color: #718096; font-size: 0.75rem; margin-top: 2px; }
 
-        /* منطقة الإدخال */
         .input-capsule {
             background: #0B0E14;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -260,7 +224,6 @@
             z-index: 100;
         }
         
-        /* شريط المعاينة */
         .preview-bar {
             display: none;
             align-items: center;
@@ -297,9 +260,6 @@
             align-items: center;
             justify-content: center;
             border-radius: 6px;
-        }
-        .remove-preview-btn:active {
-            background: rgba(229, 62, 62, 0.15);
         }
 
         .input-row {
@@ -344,7 +304,6 @@
             transform: scale(0.92);
         }
 
-        /* زر الإرسال والإيقاف */
         .send-stop-btn {
             background: #252938;
             color: #E2E8F0;
@@ -362,11 +321,7 @@
             color: white !important;
             border-radius: 8px !important;
         }
-        .send-stop-btn:active {
-            transform: scale(0.92);
-        }
 
-        /* كتل الأكواد */
         .code-block {
             background: #05070B;
             border-radius: 10px;
@@ -396,10 +351,6 @@
             gap: 6px;
             padding: 6px 10px;
             border-radius: 4px;
-            transition: all 0.2s;
-        }
-        .copy-btn:active {
-            background: rgba(255,255,255,0.08);
         }
         .copy-btn.copied { color: #38A169 !important; }
         pre {
@@ -408,10 +359,9 @@
             color: #CBD5E0;
             font-family: 'Courier New', monospace;
             font-size: 0.88rem;
-            white-space: pre-wrap;
+            white-space: pre;
         }
     
-        /* زر النزول لأسفل */
         #scrollBottomBtn {
             position: fixed;
             left: 15px;
@@ -424,18 +374,13 @@
             color: #fff;
             z-index: 9999;
             display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
 
 <div class="navbar">
-    <button id="newChatTopBtn" style="background:transparent;border:none;color:white;font-size:1.6rem;cursor:pointer;padding: 5px 10px;">✎</button>
+    <button id="newChatTopBtn" style="background:transparent;border:none;color:white;font-size:1.6rem;cursor:pointer;">✎</button>
     <div class="nav-right">
         <button class="menu-btn" id="menuToggleBtn"><i class="fas fa-bars"></i></button>
         <div class="logo-area" id="headerTitle">AETHER AI</div>
@@ -469,12 +414,15 @@
 <button id="scrollBottomBtn">↓</button>
 
 <script>
+    // 🔴 حط مفتاح الـ API الخاص بك من Google AI Studio هنا ليعمل الموقع مباشرة وصاروخي!
+    const GEMINI_API_KEY = "ضع_مفتاح_API_الخاص_بك_هنا";
+
     let db = null;
     let conversations = [];
     let currentId = null;
     let isGenerating = false;
-    let abortController = null; // للتحكم وإيقاف جلب البيانات فوراً عند الضغط على زر التوقف
     let selectedFileData = null;
+    let chatHistory = [];
 
     const chatArea = document.getElementById('chatArea');
     const messageInput = document.getElementById('messageInput');
@@ -489,7 +437,6 @@
     const menuToggleBtn = document.getElementById('menuToggleBtn');
     const closeSidebarBtn = document.getElementById('closeSidebarBtn');
     const uploadBtn = document.getElementById('uploadBtn');
-    const scrollBottomBtn = document.getElementById('scrollBottomBtn');
 
     function scrollToBottom() {
         requestAnimationFrame(() => {
@@ -497,11 +444,6 @@
         });
     }
 
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', scrollToBottom);
-    }
-
-    // قاعدة البيانات IndexedDB
     const dbRequest = indexedDB.open("AetherDatabase", 1);
     dbRequest.onupgradeneeded = function(e) {
         let database = e.target.result;
@@ -513,45 +455,33 @@
         db = e.target.result;
         loadFromDB();
     };
-    dbRequest.onerror = function() {
-        if (conversations.length === 0) startNewChat();
-    };
 
     function saveToDB() {
         if (!db) return;
-        try {
-            let tx = db.transaction("state", "readwrite");
-            let store = tx.objectStore("state");
-            store.put({ id: "main_state", conversations, currentId });
-            renderSidebar();
-        } catch (err) {
-            console.error("فشل الحفظ:", err);
-        }
+        let tx = db.transaction("state", "readwrite");
+        let store = tx.objectStore("state");
+        store.put({ id: "main_state", conversations, currentId });
+        renderSidebar();
     }
 
     function loadFromDB() {
         if (!db) return;
-        try {
-            let tx = db.transaction("state", "readonly");
-            let store = tx.objectStore("state");
-            let req = store.get("main_state");
-            req.onsuccess = function() {
-                if (req.result) {
-                    conversations = req.result.conversations || [];
-                    currentId = req.result.currentId || null;
-                }
-                if (conversations.length === 0) {
-                    startNewChat();
-                } else {
-                    if (!currentId) currentId = conversations[0].id;
-                    renderSidebar();
-                    loadMessages();
-                }
-            };
-            req.onerror = () => startNewChat();
-        } catch (err) {
-            startNewChat();
-        }
+        let tx = db.transaction("state", "readonly");
+        let store = tx.objectStore("state");
+        let req = store.get("main_state");
+        req.onsuccess = function() {
+            if (req.result) {
+                conversations = req.result.conversations || [];
+                currentId = req.result.currentId || null;
+            }
+            if (conversations.length === 0) {
+                startNewChat();
+            } else {
+                if (!currentId) currentId = conversations[0].id;
+                renderSidebar();
+                loadMessages();
+            }
+        };
     }
 
     function renderSidebar() {
@@ -577,13 +507,6 @@
                 }
             });
 
-            item.addEventListener('click', () => {
-                currentId = c.id;
-                saveToDB();
-                loadMessages();
-                sidebar.classList.remove('open');
-            });
-
             item.appendChild(nameSpan);
             item.appendChild(editBtn);
             convList.appendChild(item);
@@ -595,13 +518,22 @@
         const active = conversations.find(c => c.id === currentId);
         if (!active) { startNewChat(); return; }
         headerTitle.textContent = active.name;
-        active.messages.forEach(m => appendDOM(m.role, m.text, m.file));
+        
+        chatHistory = [];
+        active.messages.forEach(m => {
+            appendDOM(m.role, m.text, m.file);
+            if (m.text && m.text !== '🛑 تم إيقاف الكتابة.') {
+                chatHistory.push({
+                    role: m.role === 'user' ? 'user' : 'model',
+                    parts: [{ text: m.text }]
+                });
+            }
+        });
         scrollToBottom();
     }
 
     window.copyCode = function(button, elementId) {
         const codeText = document.getElementById(elementId)?.textContent || '';
-        if (!codeText) return;
         navigator.clipboard.writeText(codeText).then(() => {
             const original = button.innerHTML;
             button.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
@@ -629,12 +561,6 @@
                 video.className = 'chat-video';
                 video.controls = true;
                 div.appendChild(video);
-            } else {
-                const card = document.createElement('div');
-                card.className = 'chat-file-card';
-                card.innerHTML = `<i class="fas fa-file-alt"></i>
-                    <div class="file-info"><strong>${fileObj.name}</strong><span class="file-size">${fileObj.size}</span></div>`;
-                div.appendChild(card);
             }
         }
 
@@ -645,22 +571,20 @@
                 let html = '';
                 parts.forEach((part, i) => {
                     if (i % 2 === 1) {
-                        const codeId = 'code_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-                        const lines = part.split('\n');
-                        let lang = lines[0].trim() || "code";
-                        let actualCode = part.substring(part.indexOf('\n') + 1);
-                        
+                        const id = 'code_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+                        const codeLines = part.split('\n');
+                        const lang = codeLines.shift();
                         html += `<div class="code-block">
-                            <div class="code-header"><span>${lang}</span>
-                            <button class="copy-btn" onclick="copyCode(this,'${codeId}')"><i class="fas fa-copy"></i> نسخ الكود</button></div>
-                            <pre><code id="${codeId}">${escapeHTML(actualCode)}</code></pre></div>`;
+                            <div class="code-header"><span>${lang || 'code'}</span>
+                            <button class="copy-btn" onclick="copyCode(this,'${id}')"><i class="fas fa-copy"></i> نسخ</button></div>
+                            <pre><code id="${id}">${codeLines.join('\n').trim()}</code></pre></div>`;
                     } else {
-                        html += `<div>${escapeHTML(part).replace(/\n/g, '<br>')}</div>`;
+                        html += `<div>${part.replace(/\n/g,'<br>')}</div>`;
                     }
                 });
                 container.innerHTML = html;
             } else {
-                container.innerHTML = `<div>${escapeHTML(text).replace(/\n/g, '<br>')}</div>`;
+                container.innerHTML = `<div>${text.replace(/\n/g,'<br>')}</div>`;
             }
             div.appendChild(container);
         }
@@ -669,55 +593,17 @@
         scrollToBottom();
     }
 
-    function escapeHTML(str) {
-        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
-
-    // إظهار النقاط الثلاث المتحركة أثناء تفكير السيرفر
-    function showTypingIndicator() {
-        const div = document.createElement('div');
-        div.className = 'message ai-message';
-        div.id = 'typingIndicatorElement';
-        div.innerHTML = `<div class="typing-indicator">
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-        </div>`;
-        chatArea.appendChild(div);
-        scrollToBottom();
-    }
-
-    function removeTypingIndicator() {
-        const el = document.getElementById('typingIndicatorElement');
-        if (el) el.remove();
-    }
-
     function startNewChat() {
         const id = Date.now().toString();
-        conversations.unshift({ id, name: 'محادثة جديدة ✦', messages: [{ role: 'ai', text: 'هلا بك! كيف أقدر أساعدك اليوم؟ ارسل لي أي سؤال، كود، أو ملف وأبشر بالسعد.' }] });
+        conversations.unshift({ id, name: 'محادثة جديدة ✦', messages: [{ role: 'ai', text: 'مرحباً بك مع جيل AETHER AI الخارق! كيف أقدر أساعدك اليوم؟' }] });
         currentId = id;
+        chatHistory = [];
         saveToDB();
         loadMessages();
-        fetch('/new_chat', { method: 'POST' }).catch(err => console.log("سيرفر بايثون مقفل"));
     }
 
-    function handleSend() {
-        if (isGenerating) {
-            if (abortController) abortController.abort(); // قطع الاتصال فوراً بالبايثون
-            isGenerating = false;
-            removeTypingIndicator();
-            sendStopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
-            sendStopBtn.classList.remove('stop-mode');
-            
-            const active = conversations.find(c => c.id === currentId);
-            if (active) {
-                const stopMsg = { role: 'ai', text: '🛑 تم إيقاف توليد الإجابة.' };
-                active.messages.push(stopMsg);
-                appendDOM('ai', stopMsg.text);
-                saveToDB();
-            }
-            return;
-        }
+    async function handleSend() {
+        if (isGenerating) return;
 
         const val = messageInput.value.trim();
         if (!val && !selectedFileData) return;
@@ -726,70 +612,66 @@
         if (!active) return;
 
         const userMsg = { role: 'user', text: val, file: selectedFileData };
-        
-        if (active.name === 'محادثة جديدة ✦' && val.trim().length > 0) {
+        if (active.name === 'محادثة جديدة ✦' && val.length > 0) {
             active.name = val.substring(0,30);
-            headerTitle.textContent = active.name;
         }
 
         active.messages.push(userMsg);
         appendDOM('user', val, selectedFileData);
         
-        const fileToSend = selectedFileData;
-
+        let backupFileData = selectedFileData;
         selectedFileData = null;
         previewBar.style.display = 'none';
         messageInput.value = '';
-        messageInput.focus();
 
         isGenerating = true;
-        sendStopBtn.innerHTML = '<i class="fas fa-square"></i>';
-        sendStopBtn.classList.add('stop-mode');
-        
-        // إظهار الثلاث نقاط المتحركة فوراً
-        showTypingIndicator();
+        sendStopBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-        abortController = new AbController ? new AbortController() : null;
-        const signal = abortController ? abortController.signal : null;
-
-        // إرسال البيانات فوراً لسكربت البايثون app.py
-        fetch('/ask', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: val, file: fileToSend }),
-            signal: signal
-        })
-        .then(res => res.json())
-        .then(data => {
-            removeTypingIndicator();
-            if (!isGenerating) return;
+        try {
+            let requestParts = [];
             
-            const reply = data.reply || "لم أستطع معالجة الرد.";
-            const aiMsg = { role: 'ai', text: reply };
+            if (backupFileData && backupFileData.type.startsWith('image/')) {
+                const base64Data = backupFileData.src.split(',')[1];
+                requestParts.push({
+                    inlineData: {
+                        mimeType: backupFileData.type,
+                        data: base64Data
+                    }
+                });
+            }
+
+            const systemPrompt = "أنت مساعد ذكاء اصطناعي خارق واسمك AETHER AI، خبير ومحترف جداً في البرمجة والأمن السيبراني وروبلوكس. تكلم دائماً بالعامية السعودية المريحة وبدون أي رسميات. اكتب الأكواد كاملة بدون أي اختصار داخل علامات الأكواد الثلاثية.";
+            requestParts.push({ text: `${systemPrompt}\n\nالمستخدم: ${val}` });
+
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [...chatHistory, { role: "user", parts: requestParts }]
+                })
+            });
+
+            const data = await response.json();
+            const replyText = data.candidates[0].content.parts[0].text;
+
+            const aiMsg = { role: 'ai', text: replyText };
             active.messages.push(aiMsg);
-            appendDOM('ai', reply);
-            
+            appendDOM('ai', replyText);
+
+            chatHistory.push({ role: 'user', parts: [{ text: val }] });
+            chatHistory.push({ role: 'model', parts: [{ text: replyText }] });
+
+        } catch (error) {
+            appendDOM('ai', "❌ فشل الاتصال بالذكاء الاصطناعي، تأكد من وضع مفتاح الـ API بشكل صحيح.");
+        } finally {
             isGenerating = false;
             sendStopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
-            sendStopBtn.classList.remove('stop-mode');
             saveToDB();
-        })
-        .catch(err => {
-            removeTypingIndicator();
-            if (!isGenerating) return;
-            if (err.name === 'AbortError') return;
-            
-            const aiMsg = { role: 'ai', text: "❌ فشل الاتصال بعقل البايثون الفائق. تأكد من تشغيل ملف app.py" };
-            active.messages.push(aiMsg);
-            appendDOM('ai', aiMsg.text);
-            isGenerating = false;
-            sendStopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
-            sendStopBtn.classList.remove('stop-mode');
-        });
+        }
     }
 
     sendStopBtn.onclick = handleSend;
-    messageInput.onkeydown = (e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
+    messageInput.onkeydown = (e) => { if(e.key === 'Enter') { e.preventDefault(); handleSend(); } };
     
     menuToggleBtn.onclick = () => sidebar.classList.add('open');
     closeSidebarBtn.onclick = () => sidebar.classList.remove('open');
@@ -802,20 +684,16 @@
         reader.onload = e => {
             selectedFileData = {
                 name: file.name, type: file.type,
-                size: (file.size / 1024).toFixed(1) + ' KB',
                 src: e.target.result
             };
             if (file.type.startsWith('image/')) {
                 previewContent.innerHTML = `<img src="${e.target.result}" class="preview-thumb"> <span>${file.name}</span>`;
-            } else if (file.type.startsWith('video/')) {
-                previewContent.innerHTML = `<i class="fas fa-video" style="font-size:1.3rem; color:#A0AEC0;"></i> <span>${file.name}</span>`;
             } else {
-                previewContent.innerHTML = `<i class="fas fa-file-alt" style="font-size:1.3rem; color:#A0AEC0;"></i> <span>${file.name}</span>`;
+                previewContent.innerHTML = `<i class="fas fa-file" style="font-size:1.3rem; color:#A0AEC0;"></i> <span>${file.name}</span>`;
             }
             previewBar.style.display = 'flex';
         };
         reader.readAsDataURL(file);
-        fileSelector.value = '';
     };
 
     removePreviewBtn.onclick = () => {
@@ -823,26 +701,7 @@
         previewBar.style.display = 'none';
     };
 
-    document.addEventListener('touchstart', (e) => {
-        if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuToggleBtn.contains(e.target)) {
-            sidebar.classList.remove('open');
-        }
-    }, { passive: true });
-
-    chatArea.addEventListener('scroll', () => {
-        const nearBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight < 150;
-        scrollBottomBtn.style.display = nearBottom ? 'none' : 'flex';
-    });
-    
-    scrollBottomBtn.onclick = () => {
-        chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'smooth' });
-    };
-
-    window.addEventListener('beforeunload', saveToDB);
-
-    document.getElementById('newChatTopBtn')?.addEventListener('click', () => {
-        startNewChat();
-    });
+    document.getElementById('newChatTopBtn')?.addEventListener('click', startNewChat);
 </script>
 </body>
 </html>
